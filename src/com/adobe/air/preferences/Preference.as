@@ -23,7 +23,7 @@ package com.adobe.air.preferences
 			registerClassAlias("com.adobe.air.preferences.PreferenceItem",  com.adobe.air.preferences.PreferenceItem);			
 			if (filename == null)
 			{
-				this._filename = "prefs.obj";
+				this._filename = "_prefs.obj";
 			}
 		}
 		
@@ -88,9 +88,9 @@ package com.adobe.air.preferences
 			}
 		}
 
-		public function getValue(name: String): *
+		public function getValue(name: String, defaultValue: * = null): *
 		{
-			var result: * = null;
+			var result: * = defaultValue;
 			if (this._data[name] != undefined)
 			{
 				var prefItm: PreferenceItem = PreferenceItem(this._data[name]);
@@ -144,36 +144,24 @@ package com.adobe.air.preferences
 			}
 		}
 
-		public function savePreferences(): void
+		public function save(): void
 		{
 			var prefsFile: File = File.applicationStorageDirectory.resolvePath(this._filename);
 			var fs: FileStream = new FileStream();
-			try
-			{
-				fs.open(prefsFile, FileMode.WRITE);
-				fs.writeObject(this._data);
-			}
-			finally
-			{
-				fs.close();
-			}
+			fs.open(prefsFile, FileMode.WRITE);
+			fs.writeObject(this._data);
+			fs.close();
 		}
 
-		public function readPreferences(): void
+		public function load(): void
 		{
 			var prefsFile: File = File.applicationStorageDirectory.resolvePath(this._filename);
 			if (prefsFile.exists)
 			{
 				var fs: FileStream = new FileStream();
-				try
-				{
-					fs.open(prefsFile, FileMode.READ);
-					this._data = fs.readObject();
-				}
-				finally
-				{
-					fs.close();
-				}
+				fs.open(prefsFile, FileMode.READ);
+				this._data = fs.readObject();
+				fs.close();
 			}
 		}
 	}
