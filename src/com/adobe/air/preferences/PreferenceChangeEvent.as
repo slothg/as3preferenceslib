@@ -10,9 +10,17 @@ package com.adobe.air.preferences
 		public static const DELETE_ACTION: String = 'delete';
 
 		public var action: String = null;
-		public function PreferenceChangeEvent(action: String = null) 
+
+		public var name: String = null;
+		public var odValue:* = null;
+		public var newValue:* = null;
+
+		public function PreferenceChangeEvent(action: String = null, name: String = null, oldValue: * = null, newValue: * = null) 
 		{
 			super(PREFERENCE_CHANGED_EVENT);
+			this.name = name;
+			this.odValue = oldValue;
+			this.newValue = newValue;
 			this.action = action;
 		}
 	}

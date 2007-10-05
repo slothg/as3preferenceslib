@@ -14,9 +14,9 @@ package com.adobe.air.preferences
 	{
 		private var _modified: Boolean = false;
 		private var _filename: String = null;
-		
+
 		private var _data: Object = {};
-		
+
 		public function Preference(filename: String = null)
 		{
 			super();
@@ -25,13 +25,17 @@ package com.adobe.air.preferences
 			{
 				this._filename = "_prefs.obj";
 			}
+			else
+			{
+				this._filename = filename;
+			}
 		}
-		
+
 		public function get modified(): Boolean
 		{
 			return this._modified;
 		}
-		
+
 		private static const s_boolean: String = 'Boolean';
 		private static const s_int: String = 'int';
 		private static const s_uint: String = 'uint';
@@ -40,7 +44,8 @@ package com.adobe.air.preferences
 
 		public function setValue(name: String, value: *, encrypted: Boolean = false): void
 		{
-			this._modified = this.getValue(name) != value;
+			var oldValue: * = this.getValue(name);
+			this._modified = oldValue != value;
 			if (this._modified)
 			{
 				var prefItm: PreferenceItem = new PreferenceItem();
@@ -84,7 +89,7 @@ package com.adobe.air.preferences
 					prefItm.value = value;
 				}
 				this._data[name] = prefItm;
-				this.dispatchEvent(new PreferenceChangeEvent(PreferenceChangeEvent.ADD_EDIT_ACTION));
+				this.dispatchEvent(new PreferenceChangeEvent(PreferenceChangeEvent.ADD_EDIT_ACTION, name, oldValue, value));
 			}
 		}
 
@@ -135,12 +140,13 @@ package com.adobe.air.preferences
 		{
 			if (this._data[name] != undefined)
 			{
+				var oldValue:* = this.getValue(name);
 				if (PreferenceItem(this._data[name]).encrypted)
 				{
 					EncryptedLocalStore.removeItem(name);
 				}
 				delete this._data[name];
-				this.dispatchEvent(new PreferenceChangeEvent(PreferenceChangeEvent.DELETE_ACTION));
+				this.dispatchEvent(new PreferenceChangeEvent(PreferenceChangeEvent.DELETE_ACTION, name, oldValue));
 			}
 		}
 
@@ -148,9 +154,15 @@ package com.adobe.air.preferences
 		{
 			var prefsFile: File = File.applicationStorageDirectory.resolvePath(this._filename);
 			var fs: FileStream = new FileStream();
-			fs.open(prefsFile, FileMode.WRITE);
-			fs.writeObject(this._data);
-			fs.close();
+			try
+			{
+				fs.open(prefsFile, FileMode.WRITE);
+				fs.writeObject(this._data);
+			}
+			finally
+			{
+				fs.close();
+			}
 		}
 
 		public function load(): void
@@ -159,9 +171,15 @@ package com.adobe.air.preferences
 			if (prefsFile.exists)
 			{
 				var fs: FileStream = new FileStream();
-				fs.open(prefsFile, FileMode.READ);
-				this._data = fs.readObject();
-				fs.close();
+				try
+				{
+					fs.open(prefsFile, FileMode.READ);
+					this._data = fs.readObject();
+				}
+				finally
+				{
+					fs.close();
+				}
 			}
 		}
 	}
