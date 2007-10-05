@@ -1,9 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" creationComplete="onCreationComplete()" title="Preferences Demo">
 	<mx:Script>
 		<![CDATA[
 			import com.adobe.air.preferences.Preference;
-			private var prefs: Preference = new Preference();
+			import com.adobe.air.preferences.PreferenceChangeEvent;
+			private var prefs: Preference = new Preference('testPref.obj');
+			
+			private function onCreationComplete(): void
+			{
+				prefs.addEventListener(PreferenceChangeEvent.PREFERENCE_CHANGED_EVENT, prefChangeListener);
+			}
+
+			private function prefChangeListener(e: PreferenceChangeEvent): void
+			{
+				if (e.action == PreferenceChangeEvent.ADD_EDIT_ACTION)
+				{
+					trace('Add Edit Action');
+					trace('Old Value ' + e.odValue);
+					trace('New Value ' + e.newValue);
+				}
+				else if (e.action == PreferenceChangeEvent.DELETE_ACTION)
+				{
+					trace('Delete Action');
+				}
+			}
+
+			private function SaveIt(): void
+			{
+				prefs.setValue("Boolean Value", pBoolean.selected, encryptedBoolean.selected);
+				prefs.setValue("String Value", pString.text, encryptedString.selected);
+				prefs.setValue("Float Value", Number(pFloat.text), encryptedFloat.selected);
+				prefs.setValue("Unsigned Ineger Value", pUint.value, encryptedUnsignedInteger.selected);
+				prefs.setValue("Ineger Value", pInt.value, encryptedInteger.selected);
+				prefs.save();
+			}
+
+			private function LoadIt(): void
+			{
+				prefs.load();
+				pBoolean.selected = prefs.getValue("Boolean Value");
+				pString.text = prefs.getValue("String Value");
+				pFloat.text = prefs.getValue("Float Value");
+				pUint.value = prefs.getValue("Unsigned Ineger Value");
+				pInt.value = prefs.getValue("Ineger Value");
+			}
 		]]>
 	</mx:Script>
+	<mx:HBox width="100%">
+		<mx:Label text="Boolean Value" width="160"/>
+		<mx:CheckBox id="pBoolean"/>
+		<mx:CheckBox id="encryptedBoolean" label="Encryted"/>
+	</mx:HBox>
+	<mx:HBox width="100%">
+		<mx:Label text="String Value" width="160"/>
+		<mx:TextInput id="pString" width="100"/>
+		<mx:CheckBox id="encryptedString" label="Encryted"/>
+	</mx:HBox>
+	<mx:HBox width="100%">
+		<mx:Label text="Float Value" width="160"/>
+		<mx:TextInput id="pFloat" width="100"/>
+		<mx:CheckBox id="encryptedFloat" label="Encryted"/>
+	</mx:HBox>
+	<mx:HBox width="100%">
+		<mx:Label text="Unsigned Ineger Value" width="160"/>
+		<mx:NumericStepper id="pUint" width="100"/>
+		<mx:CheckBox id="encryptedUnsignedInteger" label="Encryted"/>
+	</mx:HBox>
+	<mx:HBox width="100%">
+		<mx:Label text="Ineger Value" width="160"/>
+		<mx:NumericStepper id="pInt" width="100" minimum="-1000"/>
+		<mx:CheckBox id="encryptedInteger" label="Encryted"/>
+	</mx:HBox>
+	<mx:HBox width="100%" height="100%">
+		<mx:Button label="Save" click="SaveIt()"/>
+		<mx:Button label="Load" click="LoadIt()"/>
+	</mx:HBox>
+	<mx:Text text="You can also use ByteArray data to store in Preference Object." width="100%"/>
+	<mx:Text text="You can delete each entry from Preference File. to Use that functionality use deleteValue(name) method of Preference Object. here name is entry value " width="100%"/>
 </mx:WindowedApplication>
