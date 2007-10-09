@@ -12,14 +12,14 @@ package com.adobe.air.preferences
 		public var action: String = null;
 
 		public var name: String = null;
-		public var odValue:* = null;
+		public var oldValue:* = null;
 		public var newValue:* = null;
 
 		public function PreferenceChangeEvent(action: String = null, name: String = null, oldValue: * = null, newValue: * = null) 
 		{
 			super(PREFERENCE_CHANGED_EVENT);
 			this.name = name;
-			this.odValue = oldValue;
+			this.oldValue = oldValue;
 			this.newValue = newValue;
 			this.action = action;
 		}
