@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" creationComplete="onCreationComplete()" title="Preferences Demo">
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" creationComplete="onCreationComplete()" title="Preferences Demo" width="600">
 	<mx:Script>
 		<![CDATA[
+			import mx.utils.StringUtil;
 			import com.adobe.air.preferences.Preference;
 			import com.adobe.air.preferences.PreferenceChangeEvent;
 			private var prefs: Preference = new Preference('testPref.obj');
@@ -16,65 +17,117 @@
 				if (e.action == PreferenceChangeEvent.ADD_EDIT_ACTION)
 				{
 					trace('Add Edit Action');
-					trace('Old Value ' + e.odValue);
+					trace('Old Value ' + e.oldValue);
 					trace('New Value ' + e.newValue);
 				}
 				else if (e.action == PreferenceChangeEvent.DELETE_ACTION)
 				{
+					trace('Old Value ' + e.oldValue);
 					trace('Delete Action');
 				}
 			}
 
+			private var byteArrayData:ByteArray = new ByteArray();
+			private var fileStream: FileStream;
+			private const pBoolValue: String = "Booean Value";
+			private const pStringValue: String = "String Value";
+			private const pFloatValue: String = "Float Value";
+			private const pUnsignedIntValue: String = "Unsigned Integer Value";
+			private const pIntegerValue: String = "Integer Value";
+			private const pByteArrayValue: String = "Byte Array Data";
+
 			private function SaveIt(): void
 			{
-				prefs.setValue("Boolean Value", pBoolean.selected, encryptedBoolean.selected);
-				prefs.setValue("String Value", pString.text, encryptedString.selected);
-				prefs.setValue("Float Value", Number(pFloat.text), encryptedFloat.selected);
-				prefs.setValue("Unsigned Ineger Value", pUint.value, encryptedUnsignedInteger.selected);
-				prefs.setValue("Ineger Value", pInt.value, encryptedInteger.selected);
+				prefs.setValue(pBoolValue, pBoolean.selected, encryptedBoolean.selected);
+				prefs.setValue(pStringValue, pString.text, encryptedString.selected);
+				prefs.setValue(pFloatValue, Number(pFloat.text), encryptedFloat.selected);
+				prefs.setValue(pUnsignedIntValue, pUint.value, encryptedUnsignedInteger.selected);
+				prefs.setValue(pIntegerValue, pInt.value, encryptedInteger.selected);
+				if (StringUtil.trim(pByteArrayData.text) != '')
+				{
+					var file: File = new File(pByteArrayData.text);
+					fileStream = new FileStream();
+					fileStream.addEventListener(ProgressEvent.PROGRESS, readProgressHandler)
+					fileStream.openAsync(file, FileMode.READ);
+				}
+				else
+				{
+					prefs.save();
+				}
+			}
+
+			private function readProgressHandler(event: ProgressEvent):void 
+			{
+		        fileStream.readBytes(byteArrayData);
+			    prefs.setValue(pByteArrayValue, byteArrayData, encryptedByteArray.selected);
 				prefs.save();
 			}
 
 			private function LoadIt(): void
 			{
 				prefs.load();
-				pBoolean.selected = prefs.getValue("Boolean Value");
-				pString.text = prefs.getValue("String Value");
-				pFloat.text = prefs.getValue("Float Value");
-				pUint.value = prefs.getValue("Unsigned Ineger Value");
-				pInt.value = prefs.getValue("Ineger Value");
+				pBoolean.selected = prefs.getValue(pBoolValue);
+				pString.text = prefs.getValue(pStringValue);
+				pFloat.text = prefs.getValue(pFloatValue);
+				pUint.value = prefs.getValue(pUnsignedIntValue);
+				pInt.value = prefs.getValue(pIntegerValue);
+				byteArrayData = prefs.getValue(pByteArrayValue); 
+			}
+			
+			private function fileOpen(): void
+			{
+				var fileToOpen:File = new File();
+				try
+				{
+				    fileToOpen.browseForOpen("Open", [new FileFilter("Text", "*.jpg; *.png")]);
+				    fileToOpen.addEventListener(Event.SELECT, fileSelected);
+				}
+				catch (error:Error)
+				{
+				    trace("Failed:", error.message);
+				}
+			}
+
+			private function fileSelected(event:Event):void 
+			{
+				pByteArrayData.text = File(event.target).url;
 			}
 		]]>
 	</mx:Script>
 	<mx:HBox width="100%">
-		<mx:Label text="Boolean Value" width="160"/>
+		<mx:Label text="Boolean Value" width="200"/>
 		<mx:CheckBox id="pBoolean"/>
 		<mx:CheckBox id="encryptedBoolean" label="Encryted"/>
 	</mx:HBox>
 	<mx:HBox width="100%">
-		<mx:Label text="String Value" width="160"/>
-		<mx:TextInput id="pString" width="100"/>
+		<mx:Label text="String Value" width="200"/>
+		<mx:TextInput id="pString" width="100" text="Sample Text"/>
 		<mx:CheckBox id="encryptedString" label="Encryted"/>
 	</mx:HBox>
 	<mx:HBox width="100%">
-		<mx:Label text="Float Value" width="160"/>
-		<mx:TextInput id="pFloat" width="100"/>
+		<mx:Label text="Float Value" width="200"/>
+		<mx:TextInput id="pFloat" width="100" text="10.0005" textAlign="right"/>
 		<mx:CheckBox id="encryptedFloat" label="Encryted"/>
 	</mx:HBox>
 	<mx:HBox width="100%">
-		<mx:Label text="Unsigned Ineger Value" width="160"/>
-		<mx:NumericStepper id="pUint" width="100"/>
+		<mx:Label text="Unsigned Ineger Value" width="200"/>
+		<mx:NumericStepper id="pUint" width="100" value="10" textAlign="right"/>
 		<mx:CheckBox id="encryptedUnsignedInteger" label="Encryted"/>
 	</mx:HBox>
 	<mx:HBox width="100%">
-		<mx:Label text="Ineger Value" width="160"/>
-		<mx:NumericStepper id="pInt" width="100" minimum="-1000"/>
+		<mx:Label text="Ineger Value" width="200"/>
+		<mx:NumericStepper id="pInt" width="100" minimum="-1000" value="-10" textAlign="right"/>
 		<mx:CheckBox id="encryptedInteger" label="Encryted"/>
+	</mx:HBox>
+	<mx:HBox width="100%">
+		<mx:Label text="File Name (for Byte array data)" width="200"/>
+		<mx:TextInput id="pByteArrayData" width="200"/>
+		<mx:Button label="..." width="20" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" click="fileOpen()"/>
+		<mx:CheckBox id="encryptedByteArray" label="Encryted"/>
 	</mx:HBox>
 	<mx:HBox width="100%" height="100%">
 		<mx:Button label="Save" click="SaveIt()"/>
 		<mx:Button label="Load" click="LoadIt()"/>
 	</mx:HBox>
-	<mx:Text text="You can also use ByteArray data to store in Preference Object." width="100%"/>
-	<mx:Text text="You can delete each entry from Preference File. to Use that functionality use deleteValue(name) method of Preference Object. here name is entry value " width="100%"/>
+	<mx:Text text="You can delete each entry from Preference File. to Use that functionality use deleteValue(name) method of Preference Object. where name is entry name" width="100%"/>
 </mx:WindowedApplication>
