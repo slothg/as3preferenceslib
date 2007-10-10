@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" creationComplete="onCreationComplete()" title="Preferences Demo" width="600">
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" creationComplete="onCreationComplete()" title="Preferences Demo" width="620">
 	<mx:Script>
 		<![CDATA[
 			import mx.utils.StringUtil;
@@ -38,7 +38,7 @@
 
 			private function SaveIt(): void
 			{
-				prefs.setValue(pBoolValue, pBoolean.selected, encryptedBoolean.selected);
+				prefs.setValue(pBoolValue, String(pBoolean.selectedValue) == 'true', encryptedBoolean.selected);
 				prefs.setValue(pStringValue, pString.text, encryptedString.selected);
 				prefs.setValue(pFloatValue, Number(pFloat.text), encryptedFloat.selected);
 				prefs.setValue(pUnsignedIntValue, pUint.value, encryptedUnsignedInteger.selected);
@@ -59,6 +59,7 @@
 			private function readProgressHandler(event: ProgressEvent):void 
 			{
 		        fileStream.readBytes(byteArrayData);
+				arLen.text = byteArrayData.length.toString(); 
 			    prefs.setValue(pByteArrayValue, byteArrayData, encryptedByteArray.selected);
 				prefs.save();
 			}
@@ -66,20 +67,34 @@
 			private function LoadIt(): void
 			{
 				prefs.load();
-				pBoolean.selected = prefs.getValue(pBoolValue);
+				pBoolean.selectedValue = prefs.getValue(pBoolValue) ? 'true' : 'false';
 				pString.text = prefs.getValue(pStringValue);
 				pFloat.text = prefs.getValue(pFloatValue);
 				pUint.value = prefs.getValue(pUnsignedIntValue);
 				pInt.value = prefs.getValue(pIntegerValue);
-				byteArrayData = prefs.getValue(pByteArrayValue); 
+				byteArrayData = prefs.getValue(pByteArrayValue);
+				arLen.text = byteArrayData.length.toString(); 
 			}
-			
+
+			private function ClearIt(): void
+			{
+				pBoolean.selectedValue = null;
+				pString.text = null;
+				pFloat.text = null;
+				pUint.value = 0;
+				pInt.value = 0;
+				byteArrayData = new ByteArray();
+				arLen.text = ' ';
+				pByteArrayData.text = ' ' ; 
+				
+			}
+
 			private function fileOpen(): void
 			{
 				var fileToOpen:File = new File();
 				try
 				{
-				    fileToOpen.browseForOpen("Open", [new FileFilter("Text", "*.jpg; *.png")]);
+				    fileToOpen.browseForOpen("Open", [new FileFilter("Text", "*.jpg; *.png; *.gif")]);
 				    fileToOpen.addEventListener(Event.SELECT, fileSelected);
 				}
 				catch (error:Error)
@@ -96,7 +111,9 @@
 	</mx:Script>
 	<mx:HBox width="100%">
 		<mx:Label text="Boolean Value" width="200"/>
-		<mx:CheckBox id="pBoolean"/>
+        <mx:RadioButtonGroup id="pBoolean" selectedValue="true"/>
+        <mx:RadioButton groupName="pBoolean" value="true" label="true"/>
+        <mx:RadioButton groupName="pBoolean" value="false" label="false"/>
 		<mx:CheckBox id="encryptedBoolean" label="Encryted"/>
 	</mx:HBox>
 	<mx:HBox width="100%">
@@ -122,12 +139,14 @@
 	<mx:HBox width="100%">
 		<mx:Label text="File Name (for Byte array data)" width="200"/>
 		<mx:TextInput id="pByteArrayData" width="200"/>
+		<mx:Label text=" " width="40" id="arLen"/>
 		<mx:Button label="..." width="20" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" click="fileOpen()"/>
 		<mx:CheckBox id="encryptedByteArray" label="Encryted"/>
 	</mx:HBox>
 	<mx:HBox width="100%" height="100%">
 		<mx:Button label="Save" click="SaveIt()"/>
 		<mx:Button label="Load" click="LoadIt()"/>
+		<mx:Button label="Clear" click="ClearIt()"/>
 	</mx:HBox>
 	<mx:Text text="You can delete each entry from Preference File. to Use that functionality use deleteValue(name) method of Preference Object. where name is entry name" width="100%"/>
 </mx:WindowedApplication>
