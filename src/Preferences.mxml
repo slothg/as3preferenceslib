@@ -94,7 +94,7 @@
 				var fileToOpen:File = new File();
 				try
 				{
-				    fileToOpen.browseForOpen("Open", [new FileFilter("Text", "*.jpg; *.png; *.gif")]);
+				    fileToOpen.browseForOpen("Open", [new FileFilter("Images", "*.jpg; *.png; *.gif")]);
 				    fileToOpen.addEventListener(Event.SELECT, fileSelected);
 				}
 				catch (error:Error)
