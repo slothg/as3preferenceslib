@@ -1,7 +1,7 @@
 package com.adobe.air.preferences
 {
 	import flash.events.EventDispatcher;
-	import flash.filesystem.EncryptedLocalStore;
+	import flash.data.EncryptedLocalStore;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
