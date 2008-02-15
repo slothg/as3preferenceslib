@@ -184,8 +184,8 @@ package com.adobe.air.preferences
 					EncryptedLocalStore.removeItem(name);
 				}
 				delete this._data[name];
+				this._modified = true;
 				this.dispatchEvent(new PreferenceChangeEvent(PreferenceChangeEvent.DELETE_ACTION, name, oldValue));
-				this.save();
 			}
 		}
 
@@ -202,6 +202,7 @@ package com.adobe.air.preferences
 			{
 				fs.close();
 			}
+			this._modified = false;
 		}
 
 		public function load(): void
