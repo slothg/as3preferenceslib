@@ -136,7 +136,11 @@ package com.adobe.air.preferences
 				if (prefItm.encrypted)
 				{
 					var bytes:ByteArray = EncryptedLocalStore.getItem(name);
-					if (prefItm.value == s_boolean)
+					if (bytes == null)
+					{
+						return defaultValue;
+					}
+					else if (prefItm.value == s_boolean)
 					{
 						result = bytes.readBoolean();
 					}
@@ -181,6 +185,7 @@ package com.adobe.air.preferences
 				}
 				delete this._data[name];
 				this.dispatchEvent(new PreferenceChangeEvent(PreferenceChangeEvent.DELETE_ACTION, name, oldValue));
+				this.save();
 			}
 		}
 
